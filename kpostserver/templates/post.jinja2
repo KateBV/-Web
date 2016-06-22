@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+{% extends "uppage.jinja2" %}
+{% block page %}
+<div id="page" style="clear: both;">
+    {% if post!=none %}
+    <div style="margin-left:auto; margin-right:auto; width: 75%; background: rgba(255, 255, 255, 0.7);">
+           <div style="font-size: 40px; margin-left:auto; margin-right:auto; width: 100%; text-align: center;">{{post.name}}</div>
+           <div style="margin-left:auto; margin-right:auto; width: 100%;">
+               <img style="margin-left:auto; margin-right:auto; width: 100%;" src="http://localhost:6543/static/image/{{post.image}}" alt="photo">
+           </div>
+           <div><a style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: center;" href="http://localhost:6543/user/{{post.user_id}}">Создан пользователем {{post.user.name}}</a></div>
+           <div><p style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">{{post.text|safe}}</p></div>
+           <div><p style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">Дополнительная информация:</p></div>
+           <div><p style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">{{post.info}}</p></div>
+           <div><p style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">Теги:</p></div>
+           {% for tag in post.tags %}
+           <a style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: center;" href="http://localhost:6543/?{{tag.typetag_id}}={{tag.id}}">{{tag.name}}</a>
+           {% endfor %}
+{% if post.user_id==ruser.id %}
+<div><a style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: center;" href="http://localhost:6543/post/{{post.id}}/remove">Удалить</a></div>
+{% endif %}
+    </div>
+    {%else%}
+    <div style="margin-left:auto; margin-right:auto; width: 75%; background: rgba(255, 255, 255, 0.7);">Запрошенного поста нет</div>
+    {%endif%}
+</div>
+
+{% endblock %}

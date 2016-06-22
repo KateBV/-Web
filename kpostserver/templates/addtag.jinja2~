@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+{% extends "uppage.jinja2" %}
+{% block page %}
+<form action="" method="POST" style="clear: both; margin-left:auto; margin-right:auto; width: 50%; height: 100%; background: rgba(255, 255, 255, 0.7); text-align:center;">
+<h2>Добавление тега</h2>
+<div><label for="name">Название <span class="required">*</span></label>
+<input name="name" type="text" value="{{ login }}" /></div>
+<a>&nbsp</a>
+<div>Тип тега</div>
+
+<select name="typetag" width: 50%;">
+	<option value="">Не выбран</option>
+        {% for typetag in typetags %}
+             <option value="{{ typetag.id }}">
+                    {{ typetag.name }}</option>
+        {% endfor %}
+</select></p>
+<a>&nbsp</a>
+<div><input type="submit" value="Сохранить" /></div>
+{% if message == "nofull" %}
+<p>Заполнены не все необходимые поля!</p>
+{% endif %}
+<h4>&nbsp</h4>
+</form>
+{% endblock %}

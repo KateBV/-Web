@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="${request.locale_name}">
+    <head>
+    <style type="text/css">
+   A {
+    text-decoration: none;
+   } 
+   A:hover { 
+    text-decoration: underline;
+    color: red;
+   } 
+  </style>
+    </head>
+    <body background="{{request.static_url('kpostserver:static/image/background.jpg')}}" link="black" vlink="black" alink="grey" style="text-decoration: none;">
+        
+        <header>
+            <div id="inner">
+                <div id="home" style="float: left;">
+                    <a href="/"><img src="{{request.static_url('kpostserver:static/image/home_icon.png')}}" height="50"></a>
+                </div>
+                <div id="login" style="float: right; font-size: 20px;">
+                    {% if ruser!=none %}
+                        Вы авторизованы как
+                        <a href="/user/{{ruser.id}}">{{ruser.name}}</a>
+                        <a href="/post">Добавить пост</a>
+                        <a href="/typetag">Добавить тип тегов</a>
+                        <a href="/tag">Добавить тег</a>
+                        <a style="float: right; margin-left: 20px;" href="/signout">Выйти</a>
+                    {%else%}
+                        <div><a href="/signup">Регистрация</a></div>
+                        <a style="float: right; font-size: 20px;" href="/signin">Вход</a>
+                    {%endif%}
+                </div>
+            </div>
+        </header>
+        
+        {% block page %}{% endblock %}
+        <footer>
+            <p>© 2016 Белкина Екатерина</p>
+        </footer>
+
+    </body>
+</html>

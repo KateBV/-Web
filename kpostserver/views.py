@@ -1,0 +1,302 @@
+from pyramid.view import view_config
+from pyramid.response import Response
+from models import User, Session, Base, engine, Post, Tag, TypeTag, Image
+
+from pyramid.security import (
+remember,
+forget,
+)
+
+from pyramid.httpexceptions import (
+HTTPFound,
+HTTPNotFound,
+)
+
+def get_user(user_name):
+    if user_name!=None:
+        DBSession = Session(bind=engine)
+        return DBSession.query(User).filter(User.name==user_name).first()
+    else: return None
+
+#home
+@view_config(route_name='home', renderer='templates/home.jinja2')
+def my_view(request):
+    DBSession = Session(bind=engine)
+    posts = DBSession.query(Post).all()
+    typetags = DBSession.query(TypeTag)
+    bd_tags = DBSession.query(Tag)
+    tags = []
+    for typetag in typetags:
+        if str(typetag.id) in request.GET:
+            tag_id = request.GET[str(typetag.id)]
+            tag = bd_tags.filter_by(id=tag_id).first()
+            if tag != None:
+                tags.append(tag)
+    if len(tags)>0:
+        posts = posts.filter(Post.tags!=None).all()
+        if len(posts)>0:
+            result_posts=[]
+            for post in posts:
+                post_tags=post.tags
+                a=True
+                for tag in tags:
+                    b=False
+                    for t in post_tags:
+                        if t.id==tag.id: b=True
+                    if a: a=b
+                if a: result_posts.append(post)
+            posts = result_posts
+    pages=None
+    if len(posts)>5:
+        pages=[]
+        page=1
+        if 'page' in request.GET:
+           page=int(request.GET['page'])
+        minpage=1
+        maxpage=10
+        countpage=len(posts) // 5
+        if len(posts) % 5>0:
+            countpage+=1
+        if maxpage>countpage:
+            maxpage=countpage
+        elif page>5:
+            minpage=page-4
+            maxpage=page+4
+            if maxpage>countpage:
+                minpage-=maxpage-countpage
+                maxpage=countpage
+        i=1
+        while i<=maxpage:
+            if i!=page:
+                pages.append(i)
+            i+=1
+        result_posts=[]
+        i=(page-1)*5
+        while i<len(posts) and i<page*5:
+            result_posts.append(posts[i])
+            i+=1
+        posts=result_posts
+        
+    return {'posts': posts,
+            'typetags': typetags,
+            'selected_tags': tags,
+            'ruser': get_user(request.authenticated_userid),
+            'pages': pages
+            }
+
+#post
+@view_config(route_name='post', renderer='templates/post.jinja2')
+def post_view(request):
+    DBSession = Session(bind=engine)
+    post_id = request.matchdict['id']
+    post = DBSession.query(Post).filter_by(id=post_id).first()
+    try:
+        post.user
+        post.tags
+    except BaseException: i=0
+    return {'post': post,
+            'ruser': get_user(request.authenticated_userid)
+            }
+
+#post delete
+@view_config(route_name='post_delete', permission='add')
+def post_remove_view(request):
+    DBSession = Session(bind=engine)
+    user = get_user(request.authenticated_userid)
+    post_id = request.matchdict['id']
+    post = DBSession.query(Post).filter_by(id=post_id).first()
+    DBSession.delete(post)
+    DBSession.commit()
+    return HTTPFound(location = '/post/'+post_id)
+
+#user
+@view_config(route_name='user', renderer='templates/user.jinja2')
+def user_view(request):
+    DBSession = Session(bind=engine)
+    user_id = request.matchdict['id']
+    user = DBSession.query(User).filter_by(id=user_id).first()
+    try:
+        user.posts
+    except BaseException: i=0
+    return {'user': user,
+            'ruser': get_user(request.authenticated_userid)
+            }
+
+#sign in
+@view_config(route_name='signin', renderer='templates/signin.jinja2')
+def singin_view(request):
+    if (get_user(request.authenticated_userid)!=None):
+        headers = forget(request)
+        return HTTPFound(location = '/signin', headers = headers)
+    if 'POST' == request.method:
+        login = request.params['login']
+        password = request.params['password']
+        DBSession = Session(bind=engine)
+        user = DBSession.query(User).filter(login==User.name).first()
+        if user!=None and user.password == password:
+            headers = remember(request, login) 
+            return HTTPFound(location = '/', headers = headers)
+        else:
+            return {'message': "Incorrect login or password",
+                    'ruser': get_user(request.authenticated_userid)
+                    }
+    else: return{'ruser': get_user(request.authenticated_userid)}
+
+#sign out
+@view_config(route_name='signout', permission='add')
+def signout_view(request):
+    headers = forget(request)
+    return HTTPFound(location = '/', headers = headers)
+
+#sign up
+@view_config(route_name='signup', renderer='templates/signup.jinja2')
+def singup_view(request):
+    if (get_user(request.authenticated_userid)!=None):
+        headers = forget(request)
+        return HTTPFound(location = '/signup', headers = headers)
+    headers = forget(request)
+    if 'POST' == request.method:
+        nameU = request.params['name']
+        passwordU = request.params['password']
+        fullnameU = request.params['fullname']
+        infoU = request.params['info']
+        DBSession = Session(bind=engine)
+        user=None
+        message=""
+        if DBSession.query(User).filter_by(name=nameU).first()==None:
+            if passwordU!=None and passwordU!="" and nameU!=None and nameU!="":
+                user = User(name=nameU, password = passwordU, fullname=fullnameU, info=infoU)
+                DBSession.add(user)
+                DBSession.commit()
+            else: message="nofull"
+        else: message="login"
+        if user!=None:
+            headers = remember(request, nameU) 
+            return HTTPFound(location = '/', headers = headers)
+        else:
+            return {'message': message,
+                    'ruser': get_user(request.authenticated_userid)
+                    }
+    else: return{'ruser': get_user(request.authenticated_userid)}
+
+#add post
+@view_config(route_name='addpost', renderer='templates/addpost.jinja2', permission='add')
+def addpost_view(request):
+    if (get_user(request.authenticated_userid)==None):
+        headers = forget(request)
+        return HTTPFound(location = '/addpost', headers = headers)
+    DBSession = Session(bind=engine)
+    if 'POST' == request.method:
+        textP = request.params['text']
+        infoP=None
+        nameP=request.params['name']
+        if 'info' in request.params:
+            infoP = request.params['info']
+        textim=False
+        try:
+            request.params["textimage"].value
+            textim=True
+        except Exception: textim=False
+        if textim:
+            im=Image(name="")
+            DBSession.add(im)
+            DBSession.commit()
+            im.name=str(im.id)+".jpg"
+            DBSession.commit()
+            with open("kpostserver/static/image/image_in_text/"+im.name,'wb') as f: 
+                f.write(request.params["textimage"].value)
+            nameP=None
+            textP=textP + " <br><a><img style=\"margin-left:auto; margin-right:auto; width: 100%;\" src=\"http://localhost:6543/static/image/image_in_text/"+im.name+"\" alt=\"photo\"></a></br> "
+            if 'name' in request.params:
+                nameP=request.params['name']
+            return{'ruser': get_user(request.authenticated_userid),
+                   'typetags': DBSession.query(TypeTag),
+                   'nameP': nameP,
+                   'textP': textP,
+                   'infoP': request.params['info'] }
+        elif 'name' in request.params and request.params['name']!="" and 'image' in request.params and textP!="":
+           try:
+               request.params["image"].value
+           except Exception:
+               return {'message': "nofull",
+                       'ruser': get_user(request.authenticated_userid),
+                       'typetags': DBSession.query(TypeTag),
+                       'textP': textP,
+                       'nameP': nameP 
+                       }
+           nameP = request.params['name']
+           post = Post(name=nameP, image="", user_id=get_user(request.authenticated_userid).id, text=textP, info=infoP)
+           DBSession.add(post)
+           DBSession.commit()
+           post.image="im"+str(post.id)+".jpg"
+           DBSession.commit()
+           with open("kpostserver/static/image/"+post.image,'wb') as f: 
+               f.write(request.params["image"].value)
+           typetags = DBSession.query(TypeTag)
+           bd_tags = DBSession.query(Tag)
+           for typetag in typetags:
+               if str(typetag.id) in request.params:
+                   tag_id = request.params[str(typetag.id)]
+                   tag = bd_tags.filter(Tag.id==tag_id).first()
+                   if tag != None:
+                       post.tags.append(tag)
+                       DBSession.commit()
+           return HTTPFound(location = '/post/'+str(post.id))
+        else:
+           return {'message': "nofull",
+                   'ruser': get_user(request.authenticated_userid),
+                   'typetags': DBSession.query(TypeTag),
+                   'textP': textP,
+                   'nameP': nameP 
+                   }
+    else: return{'ruser': get_user(request.authenticated_userid),
+                 'typetags': DBSession.query(TypeTag) }
+
+#add type tag
+@view_config(route_name='addtypetag', renderer='templates/addtypetag.jinja2', permission='add')
+def addtypetag_view(request):
+    if (get_user(request.authenticated_userid)==None):
+        headers = forget(request)
+        return HTTPFound(location = '/addtypetag', headers = headers)
+    DBSession = Session(bind=engine)
+    if 'POST' == request.method:
+        name = request.params['name']
+        if name!="":
+            if DBSession.query(TypeTag).filter(TypeTag.name==name).first()==None:
+                typetag = TypeTag(name=name)
+                DBSession.add(typetag)
+                DBSession.commit()
+                return HTTPFound(location = '/')
+            else:
+                return {'message': "typetag",
+                        'ruser': get_user(request.authenticated_userid)
+                        }
+        else:
+            return {'message': "nofull",
+                    'ruser': get_user(request.authenticated_userid)
+                    }
+    else: return{'ruser': get_user(request.authenticated_userid)}
+
+#add tag
+@view_config(route_name='addtag', renderer='templates/addtag.jinja2', permission='add')
+def addtag_view(request):
+    if (get_user(request.authenticated_userid)==None):
+        headers = forget(request)
+        return HTTPFound(location = '/addtag', headers = headers)
+    DBSession = Session(bind=engine)
+    if 'POST' == request.method:
+        name = request.params['name']
+        typetag = request.params['typetag']
+        if name!="" and typetag!="":
+            typetag = DBSession.query(TypeTag).filter(TypeTag.id==typetag).first()
+            tag = Tag(name=name, typetag_id=typetag.id)
+            DBSession.add(tag)
+            DBSession.commit()
+            return HTTPFound(location = '/')
+        else:
+            return {'message': "nofull",
+                    'ruser': get_user(request.authenticated_userid),
+                    'typetags': DBSession.query(TypeTag) 
+                    }
+    else: return{'ruser': get_user(request.authenticated_userid),
+                 'typetags': DBSession.query(TypeTag) }

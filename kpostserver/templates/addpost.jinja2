@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+{% extends "uppage.jinja2" %}
+{% block page %}
+<form action="" method="POST" style="clear: both; margin-left:auto; margin-right:auto; width: 95%; height: 100%; background: rgba(255, 255, 255, 0.7); text-align:center;" enctype="multipart/form-data">
+<h2>Добавление поста</h2>
+<div><label for="name">Название <span class="required">*</span></label>
+<input name="name" type="text" value="{{ nameP }}" /></div>
+<a>&nbsp</a>
+<div><label for="image">Изображение <span class="required">*</span></label>
+<input type="file" value="Select file" name="image" accept="image/jpeg"/></div>
+<a>&nbsp</a>
+<div>Текст <span class="required">*</span><div>
+<div><textarea name="text" style="height: 100px; width: 95%"/>{{textP|safe}}</textarea></div>
+<a>&nbsp</a>
+
+<div><label for="textimage">Вставить изображение в текст</label>
+<input type="file" value="Select file" name="textimage" accept="image/jpeg"/></div>
+<div><input type="submit" value="Добавить" /></div>
+
+<div>Дополнительная информация<div>
+<div><textarea name="info" style="height: 100px; width: 95%" value="{{ infoP }}" ></textarea></div>
+<a>&nbsp</a>
+<div>Теги</div>
+
+{% for typetag in typetags %}
+<p><label for={{typetag.id}} ">Теги "{{typetag.name}}"</label>
+
+<select name={{typetag.id}}  width: 50%;">
+	<option value="">Не выбран</option>
+        {% for tag in typetag.tags %}
+             <option value="{{ tag.id }}">
+                    {{ tag.name }}</option>
+        {% endfor %}
+</select></p>
+{% endfor %}
+
+<div><input type="submit" value="Сохранить" /></div>
+{% if message == "nofull" %}
+<p>Заполнены не все необходимые поля!</p>
+{% endif %}
+<h4>&nbsp</h4>
+</form>
+{% endblock %}

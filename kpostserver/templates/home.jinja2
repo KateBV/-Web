@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+{% extends "uppage.jinja2" %}
+{% block page %}
+
+<div id="page" style="clear: both;">
+   <div style="margin-left:auto; margin-right:auto; width: 50%; background: rgba(255, 255, 255, 0.7); text-align: center;">
+        <div style="font-size: 20px; ">Фильтр по тегам</div>
+        <div><form action="" method="GET">
+            {% for typetag in typetags %}
+            <p><label for={{typetag.id}} style="font-size: 20px">Фильтр "{{typetag.name}}"</label>
+            <select name={{typetag.id}} style="font-size: 20px; width: 50%;">
+                <option value="">Не выбран</option>
+                {% for tag in typetag.tags %}
+                <option {% if selected_tags.count(tag)>0 %}selected {% endif %}value="{{ tag.id }}">
+                    {{ tag.name }}</option>
+                {% endfor %}
+            </select></p>
+            {% endfor %}
+            <p><input type="submit" value="Применить" style="font-size: 20px;"/></p>
+            {% if pages!=none %}
+            <p>Переход на страницу</p>
+            <p><div style="margin-left:auto; margin-right:auto; width: 100%;">
+            {% for p in pages %}
+            <input name="page" type="submit" value="{{p}}" style="font-size: 20px;">
+            {% endfor %}
+            </div></p>
+            {% endif %}
+        </form></div>
+    </div>
+
+    <div id="container">
+        <section id="content">
+            <div id="items_column">
+                <ul style="list-style-type: none;">
+                    {% for post in posts %}
+                    <li value="{{ post.id }}" style="margin-left:auto; margin-right:auto; width: 75%; background: rgba(255, 255, 255, 0.7);">
+                        <a name="item" href="/post/{{post.id}}" >
+                            <div style="font-size: 40px; margin-left:auto; margin-right:auto; width: 100%; text-align: center;">{{post.name}}</div>
+                            <div style="margin-left:auto; margin-right:auto; width: 500px;">
+                                <img style="margin-left:auto; margin-right:auto; width: 500px;" src="static/image/{{post.image}}" alt="photo">
+                            </div>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

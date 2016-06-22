@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+{% extends "uppage.jinja2" %}
+{% block page %}
+<body>
+<form action="" method="POST" style="clear: both; margin-left:auto; margin-right:auto; width: 40%; height: 100%; background: rgba(255, 255, 255, 0.7); text-align:center;">
+<h2>Вход</h2>
+<div><label for="login">Логин <span class="required">*</span></label>
+<input name="login" type="text" value="{{ login }}" /></div>
+<a>&nbsp</a>
+<div><label for="password">Пароль <span class="required">*</span></label>
+<input name="password" type="password" /></div>
+<a>&nbsp</a>
+<div><input type="submit" value="Войти" /></div>
+{% if message == "Incorrect login or password" %}
+<p>Неверный логин или пароль!</p>
+{% endif %}
+</form>
+<div><p style="clear: both; margin-left:auto; margin-right:auto; width: 40%; height: 100%; background: rgba(255, 255, 255, 0.7); text-align:center;"><a href="http://localhost:6543/signup">Зарегистрироваться</a></p></div>
+</body>
+{% endblock %}

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{% extends "uppage.jinja2" %}
+{% block page %}
+<form action="" method="POST" style="clear: both; margin-left:auto; margin-right:auto; width: 40%; height: 100%; background: rgba(255, 255, 255, 0.7); text-align:center;">
+<h2>Вход</h2>
+<div><label for="name">Логин <span class="required">*</span></label>
+<input name="name" type="text" value="{{ login }}" /></div>
+<a>&nbsp</a>
+<div><label for="password">Пароль <span class="required">*</span></label>
+<input name="password" type="text" /></div>
+<a>&nbsp</a>
+<div><label for="fullname">Имя </label>
+<input name="fullname" type="text" value="{{ login }}" /></div>
+<a>&nbsp</a>
+<div><label for="info">Дополнительная информация</label>
+<input name="info" type="text" /></div>
+<a>&nbsp</a>
+<div><input type="submit" value="Зарегистрироваться" /></div>
+{% if message == "login" %}
+<p>Такой логин уже занят!</p>
+{% endif %}
+{% if message == "nofull" %}
+<p>Заполнены не все необходимые поля!</p>
+{% endif %}
+<h4>&nbsp</h4>
+</form>
+{% endblock %}

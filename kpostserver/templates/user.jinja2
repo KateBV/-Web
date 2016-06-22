@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+{% extends "uppage.jinja2" %}
+{% block page %}
+<div id="page" style="clear: both;">
+    {% if user!=none %}
+    <div style="margin-left:auto; margin-right:auto; width: 75%; background: rgba(255, 255, 255, 0.7);">
+           <div><p style="font-size: 30px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">{{user.name}}</p></div>
+           <div><p style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">Идентификатор: {{user.id}}</p></div>
+           {% if user.id==ruser.id %}
+           <div><p style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">Пароль: {{user.password}}</p></div>
+           {% endif %}
+           <div><p style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">Полное имя: {{user.fullname}}</p></div>
+           <div><p style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">Дополнительная информация:</p></div>
+           <div><p style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">{{user.info}}</p></div>
+           <div><p style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">Публикации:</p></div>
+           {% for post in user.posts %}
+           <a style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: center;" href="http://localhost:6543/post/{{post.id}}">{{post.name}}</a>
+           {% endfor %}
+    </div>
+    {%else%}
+    <div style="margin-left:auto; margin-right:auto; width: 75%; background: rgba(255, 255, 255, 0.7);">Запрошенного пользователя нет</div>
+    {%endif%}
+</div>
+{% endblock %}
