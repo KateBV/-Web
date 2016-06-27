@@ -6,7 +6,7 @@
     <div style="margin-left:auto; margin-right:auto; width: 75%; background: rgba(255, 255, 255, 0.7);">
            <div style="font-size: 40px; margin-left:auto; margin-right:auto; width: 100%; text-align: center;">{{post.name}}</div>
            <div style="margin-left:auto; margin-right:auto; width: 100%;">
-               <img style="margin-left:auto; margin-right:auto; width: 100%;" src="http://localhost:6543/static/image/{{post.image}}" alt="photo">
+               <a href="http://localhost:6543/static/image/{{post.image}}"><img style="margin-left:auto; margin-right:auto; width: 50%;" src="http://localhost:6543/static/image/{{post.image}}" alt="photo"></a>
            </div>
            <div><a style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: center;" href="http://localhost:6543/user/{{post.user_id}}">Создан пользователем {{post.user.name}}</a></div>
            <div><p style="font-size: 15px; margin-left:auto; margin-right:auto; width: 100%; text-align: left;">{{post.text|safe}}</p></div>

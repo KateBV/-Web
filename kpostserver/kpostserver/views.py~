@@ -206,7 +206,7 @@ def addpost_view(request):
             with open("kpostserver/static/image/image_in_text/"+im.name,'wb') as f: 
                 f.write(request.params["textimage"].value)
             nameP=None
-            textP=textP + " <br><div style=\"margin-left:auto; margin-right:auto; width: 100%;\"><img style=\"margin-left:auto; margin-right:auto; width: 100%;\" src=\"http://localhost:6543/static/image/image_in_text/"+im.name+"}}\" alt=\"photo\"></div></br> "
+            textP=textP + " <div style=\"margin-left:auto; margin-right:auto; width: 50%;\"><a  href=\"http://localhost:6543/static/image/image_in_text/"+im.name+"\"><img style=\"margin-left:auto; margin-right:auto; width: 100%;\" src=\"http://localhost:6543/static/image/image_in_text/"+im.name+"\" alt=\"photo\"></a></div> "
             if 'name' in request.params:
                 nameP=request.params['name']
             return{'ruser': get_user(request.authenticated_userid),

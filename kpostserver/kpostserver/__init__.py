@@ -8,7 +8,7 @@ from pyramid.security import Authenticated, Everyone
 
 my_session_factory = SignedCookieSessionFactory('itsaseekreet')
 
-class HelloFactory(object):
+class MyFactory(object):
     def __init__(self, request):
         self.__acl__ = [
             (Allow, Everyone, 'view'),
@@ -19,19 +19,13 @@ def main(global_config, **settings):
     """
 
     Base.metadata.create_all()
-    DBSession = Session(bind=engine)
-    result = DBSession.query(User).all()
-    if (len(result) == 0):
-        new_user = User(name="admin", password = "12345")
-        DBSession.add(new_user)
-        DBSession.commit()
 
     ####
 
     authn_policy = AuthTktAuthenticationPolicy('sosecret', hashalg='sha512')
     authz_policy = ACLAuthorizationPolicy()
 
-    config = Configurator(settings=settings, session_factory=my_session_factory, root_factory=HelloFactory)
+    config = Configurator(settings=settings, session_factory=my_session_factory, root_factory=MyFactory)
     config.set_authentication_policy(authn_policy)
     config.set_authorization_policy(authz_policy)
     config.include('pyramid_jinja2')
